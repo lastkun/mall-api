@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"mall-api/mall-user-web/forms"
+	middlewares "mall-api/mall-user-web/middleware"
 	"net/http"
 	"strconv"
 	"time"
@@ -66,4 +68,71 @@ func LoginByPassword(ctx *gin.Context) {
 		utils.HandleValidatorError(ctx, err)
 		return
 	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
+	if err != nil {
+		zap.S().Errorw("连接用户grpc服务失败",
+			"msg", err.Error())
+	}
+
+	client := proto.NewUserClient(conn)
+	response, err := client.GetUserByMobile(context.Background(), &proto.MobileRequest{
+		Mobile: form.Mobile,
+	})
+
+	if err != nil {
+		zap.S().Errorw("登录失败",
+			"msg", err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "登录失败",
+		})
+		return
+	}
+
+	checkResponse, err := client.CheckPassword(context.Background(), &proto.CheckPasswordRequest{
+		Password:     form.PassWord,
+		EncryptedPwd: response.Password,
+	})
+
+	if err != nil {
+		zap.S().Errorw("检查密码失败",
+			"msg", err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "检查密码失败",
+		})
+		return
+	}
+
+	check := checkResponse.Success
+	if !check {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "密码错误",
+		})
+	} else {
+		//生成token
+		j := middlewares.NewJWT()
+		claims := utils.CustomClaims{
+			ID:       response.Id,
+			NickName: response.Nickname,
+			Role:     response.Role,
+			StandardClaims: jwt.StandardClaims{
+				NotBefore: time.Now().Unix(),            //生效时间
+				ExpiresAt: time.Now().Unix() + 60*60*24, //过期时间
+				Issuer:    "mall",
+			},
+		}
+		token, err := j.CreateToken(claims)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"msg": "生成Token失败",
+			})
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"id":           response.Id,
+			"nickname":     response.Nickname,
+			"token":        token,
+			"expired_time": 1000 * (time.Now().Unix() + 60*60*24),
+		})
+	}
+
 }

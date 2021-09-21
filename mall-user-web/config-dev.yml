@@ -1,5 +1,7 @@
 name: 'mall-user-web'
 port: 8081
+jwt:
+  key: 'ghk@123123!'
 user_service:
   host: '127.0.0.1'
   port: 9001
