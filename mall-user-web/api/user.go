@@ -3,8 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"mall-api/mall-user-web/global"
-	"mall-api/mall-user-web/utils"
+	"mall-api/mall-user-web/forms"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,7 +12,9 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"mall-api/mall-user-web/global"
 	"mall-api/mall-user-web/proto"
+	"mall-api/mall-user-web/utils"
 )
 
 func GetUserList(ctx *gin.Context) {
@@ -55,4 +56,14 @@ func GetUserList(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, result)
+}
+
+//通过账号密码登录
+//请求底层grpc服务前需要先进行表单验证-- ctx.ShouldBindJSON
+func LoginByPassword(ctx *gin.Context) {
+	form := forms.LoginByPwdForm{}
+	if err := ctx.ShouldBind(&form); err != nil {
+		utils.HandleValidatorError(ctx, err)
+		return
+	}
 }

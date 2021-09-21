@@ -2,10 +2,14 @@ package utils
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"mall-api/mall-user-web/global"
 )
 
 //grpc状态码转http状态码
@@ -37,4 +41,26 @@ func StatusCodesHandler(err error, c *gin.Context) {
 			return
 		}
 	}
+}
+
+func HandleValidatorError(ctx *gin.Context, err error) {
+	errs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg": err.Error(),
+		})
+	}
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"error": removeTopStruct(errs.Translate(global.Trans)),
+	})
+	return
+}
+
+//去掉响应信息中的struct名 例如：LoginByPwdForm.password
+func removeTopStruct(fileds map[string]string) map[string]string {
+	result := map[string]string{}
+	for field, err := range fileds {
+		result[field[strings.Index(field, ".")+1:]] = err
+	}
+	return result
 }
