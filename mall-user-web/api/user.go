@@ -69,6 +69,14 @@ func LoginByPassword(ctx *gin.Context) {
 		return
 	}
 
+	//验证码校验
+	if !store.Verify(form.CaptchaId, form.Captcha, true) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "验证码错误",
+		})
+		return
+	}
+
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
 	if err != nil {
 		zap.S().Errorw("连接用户grpc服务失败",
