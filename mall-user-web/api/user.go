@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis/v8"
 	"mall-api/mall-user-web/forms"
 	middlewares "mall-api/mall-user-web/middleware"
 	"net/http"
@@ -143,4 +144,59 @@ func LoginByPassword(ctx *gin.Context) {
 		})
 	}
 
+}
+
+//注册
+func RegisterByMobile(ctx *gin.Context) {
+	form := forms.RegisterForm{}
+	if err := ctx.ShouldBind(&form); err != nil {
+		utils.HandleValidatorError(ctx, err)
+		return
+	}
+
+	//从redis中取出验证码并校验
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%d", global.ServerConfig.RC.Host, global.ServerConfig.RC.Port),
+	})
+
+	val, err := redisClient.Get(context.Background(), form.Mobile).Result()
+	if err == redis.Nil {
+		zap.S().Infof("注册-验证码已过期：不存在key = %s", form.Mobile)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "验证码已过期，请重试",
+		})
+		return
+	}
+
+	//校验失败
+	if val != form.Code {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "验证码输入错误，请重试",
+		})
+		return
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
+	if err != nil {
+		zap.S().Errorw("连接用户grpc服务失败",
+			"msg", err.Error())
+	}
+
+	client := proto.NewUserClient(conn)
+
+	resp, err := client.AddUser(context.Background(), &proto.AddUserRequest{
+		Password: form.PassWord,
+		Mobile:   form.Mobile,
+		Nickname: form.Nickname,
+	})
+
+	if err != nil {
+		zap.S().Errorf("注册失败--  AddUser : %s ", err.Error())
+		utils.StatusCodesHandler(err, ctx)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"msg": fmt.Sprintf("用户：%s : 您已注册成功，请登录", resp.Mobile),
+	})
 }

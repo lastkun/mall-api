@@ -2,6 +2,13 @@ name: 'mall-user-web'
 port: 8081
 jwt:
   key: 'ghk@123123!'
+
+redis:
+  host: '192.168.1.6'
+  port: 6379
+  expire: 300
+
 user_service:
   host: '127.0.0.1'
   port: 9001
+

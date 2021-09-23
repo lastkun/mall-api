@@ -9,5 +9,6 @@ func BaseRouter(router *gin.RouterGroup) {
 	baseRouter := router.Group("base")
 	{
 		baseRouter.GET("getCaptcha", api.GetCaptcha)
+		baseRouter.POST("sendVerCode", api.SendVerCode)
 	}
 }
