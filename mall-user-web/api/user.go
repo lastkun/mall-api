@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	middlewares "mall-api/mall-user-web/middleware"
 
 	"mall-api/mall-user-web/forms"

@@ -9,6 +9,7 @@ import (
 //全局变量 多处复用
 var (
 	ServerConfig      = &config.ServerConfig{}
+	NacosConfig       = &config.NacosConfig{}
 	Trans             ut.Translator
 	UserServiceClient proto.UserClient
 )

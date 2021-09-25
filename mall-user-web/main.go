@@ -39,7 +39,7 @@ func main() {
 		})
 	}
 
-	zap.S().Debugf("[start] user-api port: %d", global.ServerConfig.Port)
+	zap.S().Infof("[start] user-api port: %d", global.ServerConfig.Port)
 
 	err := routers.Run(fmt.Sprintf(":%d", global.ServerConfig.Port))
 	if err != nil {

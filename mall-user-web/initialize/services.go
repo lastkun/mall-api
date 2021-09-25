@@ -2,49 +2,27 @@ package initialize
 
 import (
 	"fmt"
-	"github.com/hashicorp/consul/api"
+
+	_ "github.com/mbobakov/grpc-consul-resolver" // 集成grpc-consul解析器
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+
 	"mall-api/mall-user-web/global"
 	"mall-api/mall-user-web/proto"
 )
 
+//配置了grpc-consul解析器 并使用内置负载均衡策略
 func InitService() {
-	serviceHost := ""
-	servicePort := 0
-
-	//从注册中心拉取grpc服务信息
-	cfg := api.DefaultConfig()
-	cfg.Address = fmt.Sprintf("%s:%d", global.ServerConfig.CC.Host,
-		global.ServerConfig.CC.Port)
-
-	client, err := api.NewClient(cfg)
+	consulInfo := global.ServerConfig.CC
+	conn, err := grpc.Dial(
+		fmt.Sprintf("consul://%s:%d/%s?wait=14s", consulInfo.Host, consulInfo.Port, global.ServerConfig.Usc.Name),
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+	)
 	if err != nil {
-		panic(err)
-	}
-
-	services, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service == "%s"`, global.ServerConfig.Usc.Name))
-	if err != nil {
-		panic(err)
-	}
-
-	for _, v := range services {
-		serviceHost = v.Address
-		servicePort = v.Port
-		break
-	}
-
-	if serviceHost == "" {
 		zap.S().Fatal("用户grpc服务连接失败")
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", serviceHost, servicePort), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("连接用户grpc服务失败",
-			"msg", err.Error())
-	}
-
-	userClient := proto.NewUserClient(conn)
-
-	global.UserServiceClient = userClient
+	userServiceClient := proto.NewUserClient(conn)
+	global.UserServiceClient = userServiceClient
 }

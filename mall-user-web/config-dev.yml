@@ -1,19 +1,11 @@
-name: 'mall-user-web'
-port: 8081
-jwt:
-  key: 'ghk@123123!'
+#开发环境nacos配置信息
+host: '192.168.1.6'
+port: 8848
+namespace: '87715dc1-8444-48ed-83cc-e95b3b3b7921'
+user: 'nacos'
+password: 'nacos'
+dataid: 'user-web-config'
+group: 'dev'
 
-consul:
-  host: 192.168.1.6
-  port: 8500
 
-redis:
-  host: '192.168.1.6'
-  port: 6379
-  expire: 300
-
-user_service:
-  host: '127.0.0.1'
-  port: 9001
-  name: 'user-service'
 
