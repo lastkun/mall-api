@@ -3,6 +3,10 @@ port: 8081
 jwt:
   key: 'ghk@123123!'
 
+consul:
+  host: 192.168.1.6
+  port: 8500
+
 redis:
   host: '192.168.1.6'
   port: 6379
@@ -11,4 +15,5 @@ redis:
 user_service:
   host: '127.0.0.1'
   port: 9001
+  name: 'user-service'
 

@@ -3,36 +3,30 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-redis/redis/v8"
-	"mall-api/mall-user-web/forms"
-	middlewares "mall-api/mall-user-web/middleware"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	middlewares "mall-api/mall-user-web/middleware"
 
+	"mall-api/mall-user-web/forms"
 	"mall-api/mall-user-web/global"
 	"mall-api/mall-user-web/proto"
 	"mall-api/mall-user-web/utils"
 )
 
 func GetUserList(ctx *gin.Context) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("连接用户grpc服务失败",
-			"msg", err.Error())
-	}
-
-	client := proto.NewUserClient(conn)
+	userClient := global.UserServiceClient
 	//获取参数中的页码页长
 	pn, _ := strconv.Atoi(ctx.DefaultQuery("pn", "1"))
 	pSize, _ := strconv.Atoi(ctx.DefaultQuery("psize", "10"))
 
-	resp, err := client.GetUserList(context.Background(), &proto.PageInfo{
+	resp, err := userClient.GetUserList(context.Background(), &proto.PageInfo{
 		Pn:    uint32(pn),
 		PSize: uint32(pSize),
 	})
@@ -78,13 +72,8 @@ func LoginByPassword(ctx *gin.Context) {
 		return
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("连接用户grpc服务失败",
-			"msg", err.Error())
-	}
+	client := global.UserServiceClient
 
-	client := proto.NewUserClient(conn)
 	response, err := client.GetUserByMobile(context.Background(), &proto.MobileRequest{
 		Mobile: form.Mobile,
 	})
@@ -176,13 +165,7 @@ func RegisterByMobile(ctx *gin.Context) {
 		return
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.Usc.Name, global.ServerConfig.Usc.Port), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("连接用户grpc服务失败",
-			"msg", err.Error())
-	}
-
-	client := proto.NewUserClient(conn)
+	client := global.UserServiceClient
 
 	resp, err := client.AddUser(context.Background(), &proto.AddUserRequest{
 		Password: form.PassWord,

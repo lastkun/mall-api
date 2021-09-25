@@ -22,6 +22,8 @@ func main() {
 	initialize.InitTrans("zh")
 	//初始化routers
 	routers := initialize.Routers()
+	//初始化grpc服务client
+	initialize.InitService()
 
 	//绑定自定义validator
 	//if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
