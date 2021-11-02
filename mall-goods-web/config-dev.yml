@@ -4,7 +4,7 @@ port: 8848
 namespace: '87715dc1-8444-48ed-83cc-e95b3b3b7921'
 Goods: 'nacos'
 password: 'nacos'
-dataid: 'Goods-goods-config'
+dataid: 'goods-web-config'
 group: 'dev'
 
 

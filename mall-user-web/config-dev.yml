@@ -1,7 +1,7 @@
 #开发环境nacos配置信息
-host: '192.168.1.6'
+host: '192.168.101.11'
 port: 8848
-namespace: '87715dc1-8444-48ed-83cc-e95b3b3b7921'
+namespace: '72ae8fa6-de75-487b-a1b7-9ca8df5bbfb3'
 user: 'nacos'
 password: 'nacos'
 dataid: 'user-web-config'
