@@ -11,6 +11,7 @@ import (
 	"mall-api/mall-goods-web/proto"
 )
 
+//服务发现
 //配置了grpc-consul解析器 并使用内置负载均衡策略
 func InitService() {
 	consulInfo := global.ServerConfig.CC
