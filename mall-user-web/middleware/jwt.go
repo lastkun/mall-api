@@ -12,6 +12,7 @@ import (
 	"mall-api/mall-user-web/utils"
 )
 
+// JWT登录验证
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Request.Header.Get("x-token")

@@ -11,8 +11,10 @@ func Routers() *gin.Engine {
 	router := gin.Default()
 	//解决跨域问题
 	router.Use(middlewares.Cors())
-	mainGroup := router.Group("/api")
-	GoodsRouter.GoodsRouter(mainGroup)
-	GoodsRouter.BaseRouter(mainGroup)
+	mainGroup := router.Group("/api/g")
+	GoodsRouter.InitCategoryRouter(mainGroup)
+	GoodsRouter.InitGoodsRouter(mainGroup)
+	GoodsRouter.InitBannerRouter(mainGroup)
+	GoodsRouter.InitBrandRouter(mainGroup)
 	return router
 }
