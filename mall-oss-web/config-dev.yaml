@@ -1,0 +1,7 @@
+host: ''
+port: 8848
+namespace: ''
+user: 'nacos'
+password: 'nacos'
+dataid: 'mall-oss-web.json'
+group: 'dev'
