@@ -203,7 +203,7 @@ func Stocks(ctx *gin.Context) {
 func UpdateStatus(ctx *gin.Context) {
 	form := forms.GoodsStatusForm{}
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		HandleValidatorError(ctx, err)
+		base.HandleValidatorError(ctx, err)
 		return
 	}
 
@@ -216,7 +216,7 @@ func UpdateStatus(ctx *gin.Context) {
 		IsNew:  *form.IsNew,
 		OnSale: *form.OnSale,
 	}); err != nil {
-		HandleGRPCErrorToHttp(err, ctx)
+		base.HandleGRPCErrorToHttp(err, ctx)
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
@@ -227,7 +227,7 @@ func UpdateStatus(ctx *gin.Context) {
 func Update(ctx *gin.Context) {
 	form := forms.GoodsForm{}
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		HandleValidatorError(ctx, err)
+		base.HandleValidatorError(ctx, err)
 		return
 	}
 
